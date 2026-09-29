@@ -1,5 +1,5 @@
 import React from 'react'
-import { getAnimeList, PAGE_SIZE } from '../service/anime'
+import { getAnimeList, PAGE_SIZE } from '../services/anime'
 import type { Anime } from '../types/anime'
 import { AnimeCard } from '../components/anime-card'
 import { SearchBar } from '../components/search-bar'
