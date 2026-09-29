@@ -9,3 +9,10 @@ export interface Anime {
   subtype: string
   startDate: string | null
 }
+
+export interface AnimeListResult {
+  animes: Anime[]
+  total: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}

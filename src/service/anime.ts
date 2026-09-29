@@ -1,4 +1,4 @@
-import type { Anime } from '../types/anime'
+import type { Anime, AnimeListResult } from '../types/anime'
 import type {
   KitsuAnimeDetailsResponse,
   KitsuAnimeListResponse,
@@ -7,9 +7,14 @@ import type {
 
 const BASE_URL = 'https://kitsu.io/api/edge/anime'
 
-export async function getAnimeList(query: string = '', page: number = 1) {
+export const PAGE_SIZE = 15
+
+export async function getAnimeList(
+  query: string = '',
+  page: number = 1,
+): Promise<AnimeListResult> {
   try {
-    const limit = 15
+    const limit = PAGE_SIZE
     const offset = (page - 1) * limit
 
     const params = new URLSearchParams({
@@ -29,7 +34,12 @@ export async function getAnimeList(query: string = '', page: number = 1) {
 
     const data: KitsuAnimeListResponse = await response.json()
 
-    return data.data.map(mapearAnime)
+    return {
+      animes: data.data.map(mapearAnime),
+      total: data.meta?.count ?? 0,
+      hasNextPage: data.links?.next != null,
+      hasPreviousPage: data.links?.prev != null,
+    }
   } catch (err) {
     console.log(err)
     throw err

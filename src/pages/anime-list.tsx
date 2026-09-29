@@ -1,23 +1,28 @@
 import React from 'react'
+import { getAnimeList, PAGE_SIZE } from '../service/anime'
 import type { Anime } from '../types/anime'
 import { AnimeCard } from '../components/anime-card'
 import { SearchBar } from '../components/search-bar'
 import { EmptyState } from '../components/empty-state'
 import { LoadingGrid } from '../components/loading-grid'
-import { getAnimeList } from '../service/anime'
+import { Pagination } from '../components/pagination'
 
 export function AnimeList() {
   const [animes, setAnimes] = React.useState<Anime[] | null>(null)
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState(false)
+  const [page, setPage] = React.useState(1)
+  const [total, setTotal] = React.useState(0)
+  const [query, setQuery] = React.useState('')
 
-  async function fetchAnimeList(query?: string) {
+  async function fetchAnimeList(query: string, page: number) {
     try {
       setLoading(true)
       setError(false)
-      const animes = await getAnimeList(query)
+      const result = await getAnimeList(query, page)
 
-      setAnimes(animes)
+      setAnimes(result.animes)
+      setTotal(result.total)
     } catch {
       setError(true)
     } finally {
@@ -27,14 +32,21 @@ export function AnimeList() {
 
   React.useEffect(() => {
     async function loadAnime() {
-      await fetchAnimeList()
+      await fetchAnimeList('', 1)
     }
 
     loadAnime()
   }, [])
 
   function handleSearch(query: string) {
-    fetchAnimeList(query)
+    setQuery(query)
+    setPage(1)
+    fetchAnimeList(query, 1)
+  }
+
+  function handlePageChange(nextPage: number) {
+    setPage(nextPage)
+    fetchAnimeList(query, nextPage)
   }
 
   function handleSelect(id: string) {
@@ -42,6 +54,8 @@ export function AnimeList() {
   }
 
   if (!animes) return null
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   return (
     <div className="flex w-full flex-col gap-8 px-6 py-10">
@@ -74,11 +88,21 @@ export function AnimeList() {
         />
       )}
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {animes.map((anime) => (
-          <AnimeCard key={anime.id} anime={anime} onSelect={handleSelect} />
-        ))}
-      </div>
+      {!loading && !error && animes.length > 0 && (
+        <>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {animes.map((anime) => (
+              <AnimeCard key={anime.id} anime={anime} onSelect={handleSelect} />
+            ))}
+          </div>
+
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
     </div>
   )
 }
