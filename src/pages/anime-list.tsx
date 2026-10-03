@@ -6,6 +6,7 @@ import { SearchBar } from '../components/search-bar'
 import { EmptyState } from '../components/empty-state'
 import { LoadingGrid } from '../components/loading-grid'
 import { Pagination } from '../components/pagination'
+import { useNavigate } from 'react-router'
 
 export function AnimeList() {
   const [animes, setAnimes] = React.useState<Anime[] | null>(null)
@@ -14,6 +15,8 @@ export function AnimeList() {
   const [page, setPage] = React.useState(1)
   const [total, setTotal] = React.useState(0)
   const [query, setQuery] = React.useState('')
+
+  const navigate = useNavigate()
 
   async function fetchAnimeList(query: string, page: number) {
     try {
@@ -50,7 +53,7 @@ export function AnimeList() {
   }
 
   function handleSelect(id: string) {
-    console.log('Anime selecionado:', id)
+    navigate(`/anime/${id}`)
   }
 
   if (!animes) return null
